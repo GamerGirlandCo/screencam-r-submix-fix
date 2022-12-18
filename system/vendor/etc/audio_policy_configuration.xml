@@ -23,8 +23,6 @@ under the License.
 	<globalConfiguration speaker_drc_enabled="true" />
 
 	<modules>
-		<!-- Remote Submix Audio HAL -->
-
 		<module name="primary" halVersion="2.0">
 			<attachedDevices>
 				<item>Speaker</item>
@@ -34,18 +32,9 @@ under the License.
 				<item>Built-In Mic</item>
 				<item>Built-In Back Mic</item>
 				<item>Telephony Rx</item>
-				<item>Remote Submix In</item>
 			</attachedDevices>
 			<defaultOutputDevice>Speaker</defaultOutputDevice>
 			<mixPorts>
-				<mixPort name="r_submix output" role="source">
-					<profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-						samplingRates="48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO" />
-				</mixPort>
-				<mixPort name="r_submix input" role="sink">
-					<profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-						samplingRates="48000" channelMasks="AUDIO_CHANNEL_IN_STEREO" />
-				</mixPort>
 				<mixPort name="primary output" role="source"
 					flags="AUDIO_OUTPUT_FLAG_PRIMARY|AUDIO_OUTPUT_FLAG_FAST">
 					<profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
@@ -132,14 +121,6 @@ under the License.
 				</mixPort>
 			</mixPorts>
 			<devicePorts>
-				<devicePort tagName="Remote Submix Out" type="AUDIO_DEVICE_OUT_REMOTE_SUBMIX" role="sink">
-					<profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-						samplingRates="48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO" />
-				</devicePort>
-				<devicePort tagName="Remote Submix In" type="AUDIO_DEVICE_IN_REMOTE_SUBMIX" role="source">
-					<profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-						samplingRates="48000" channelMasks="AUDIO_CHANNEL_IN_STEREO" />
-				</devicePort>
 				<devicePort tagName="Earpiece" type="AUDIO_DEVICE_OUT_EARPIECE" role="sink">
 				</devicePort>
 				<devicePort tagName="Speaker" type="AUDIO_DEVICE_OUT_SPEAKER" role="sink">
@@ -177,23 +158,23 @@ under the License.
 			</devicePorts>
 			<routes>
 				<route type="mix" sink="Earpiece"
-					sources="primary output,raw,deep_buffer,mmap_no_irq_out,voip_rx,Remote Submix Out" />
+					sources="primary output,raw,deep_buffer,mmap_no_irq_out,voip_rx" />
 				<route type="mix" sink="Speaker"
-					sources="primary output,raw,deep_buffer,compressed_offload,mmap_no_irq_out,voip_rx,Remote Submix Out" />
+					sources="primary output,raw,deep_buffer,compressed_offload,mmap_no_irq_out,voip_rx" />
 				<route type="mix" sink="Speaker Safe"
-					sources="primary output,raw,deep_buffer,compressed_offload,mmap_no_irq_out,voip_rx,Remote Submix Out" />
+					sources="primary output,raw,deep_buffer,compressed_offload,mmap_no_irq_out,voip_rx" />
 				<route type="mix" sink="BT SCO"
-					sources="primary output,raw,deep_buffer,voip_rx,Remote Submix Out" />
+					sources="primary output,raw,deep_buffer,voip_rx" />
 				<route type="mix" sink="BT SCO Headset"
-					sources="primary output,raw,deep_buffer,voip_rx,Remote Submix Out" />
+					sources="primary output,raw,deep_buffer,voip_rx" />
 				<route type="mix" sink="BT SCO Car Kit"
-					sources="primary output,raw,deep_buffer,voip_rx,Remote Submix Out" />
+					sources="primary output,raw,deep_buffer,voip_rx" />
 				<route type="mix" sink="USB Device Out"
-					sources="primary output,raw,deep_buffer,compressed_offload,hifi_playback,mmap_no_irq_out,voip_rx,Remote Submix Out" />
+					sources="primary output,raw,deep_buffer,compressed_offload,hifi_playback,mmap_no_irq_out,voip_rx" />
 				<route type="mix" sink="USB Headset Out"
-					sources="primary output,raw,deep_buffer,compressed_offload,hifi_playback,mmap_no_irq_out,voip_rx,Remote Submix Out" />
+					sources="primary output,raw,deep_buffer,compressed_offload,hifi_playback,mmap_no_irq_out,voip_rx" />
 				<route type="mix" sink="Telephony Tx"
-					sources="voice_tx,incall_music_uplink,Remote Submix Out" />
+					sources="voice_tx,incall_music_uplink" />
 				<route type="mix" sink="primary input"
 					sources="Built-In Mic,Built-In Back Mic,BT SCO Headset Mic,USB Device In,USB Headset In" />
 				<route type="mix" sink="hotword input"
@@ -207,8 +188,6 @@ under the License.
 					sources="Built-In Mic,Built-In Back Mic,USB Device In,USB Headset In" />
 				<route type="mix" sink="voip_tx"
 					sources="Built-In Mic,Built-In Back Mic,BT SCO Headset Mic,USB Device In,USB Headset In" />
-				<route type="mix" sink="Remote Submix Out" sources="r_submix output" />
-				<route type="mix" sink="r_submix input" sources="Remote Submix In" />
 			</routes>
 		</module>
 
@@ -234,6 +213,9 @@ under the License.
 					sources="usb_accessory output" />
 			</routes>
 		</module>
+
+		<!-- Remote Submix Audio HAL -->
+		<xi:include href="r_submix_audio_policy_configuration.xml" />
 
 		<!-- Bluetooth Audio HAL -->
 		<xi:include href="bluetooth_audio_policy_configuration.xml" />
