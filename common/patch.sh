@@ -75,32 +75,25 @@ base() {
 	
 	xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/attachedDevices" --type elem -n item -v "Remote Submix In" $the_file > $copy
 	
-	echo "0." $(cat $copy | tail -n 1)
 
 	mv -T $copy $the_file
-	echo "1." $(cat $the_file | tail -n 1)
 
 	ports 1 $the_file $copy
 
 	mv -T $copy $the_file
-	echo "2." $(cat $the_file | tail -n 1)
 
 	ports 2 $the_file $copy
 
 	mv -T $copy $the_file
-	echo "3." $(cat $the_file | tail -n 1)
 
 	routes $the_file $copy
 
 	mv -T $copy $the_file
-	echo "4." $(cat $the_file | tail -n 1)
 
 	xmlstarlet ed -u "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources" -v "$(xmlstarlet sel -t -v "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources" $the_file),primary output" $the_file > $copy
 
-	echo "4.2." $(cat $copy | tail -n 1)
 
 	mv -T $copy $the_file
-	echo "5." $(cat $the_file | tail -n 1)
 
 	ui_print "************************"
 	ui_print "  ✓ base patches done.  "
@@ -118,6 +111,5 @@ base() {
 	else
 		ui_print "skipping mic patch."
 	fi
-	echo "finfin"
 	cat $the_file | tail -n 5
 }
