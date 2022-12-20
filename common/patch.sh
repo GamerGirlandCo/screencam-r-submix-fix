@@ -55,7 +55,6 @@ routes() {
 	cp $1 $actual
 	IFS=$'\n'
 	for line in $bet; do
-	  echo $line
 		xmlstarlet ed -u "$line/@sources" -v "$(xmlstarlet sel -t -v "$line/@sources" $actual),Remote Submix Out" $1 > $2
 		mv $2 $1
 	done
