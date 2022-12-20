@@ -80,7 +80,7 @@ base() {
 	ui_print "    ( VOL ▽ = 'no'  )"
 
 	if chooseport 5; then
-		ui_print "running microhone patch..."
+		ui_print "running micrphone patch..."
 		add_input $the_file
 	else
 		ui_print "skipping mic patch."
