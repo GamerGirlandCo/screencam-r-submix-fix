@@ -1,6 +1,6 @@
 id=screencam-submix-fix
 name=Screencam submix fix
-version=v2.0
-versionCode=10
+version=v1.0
+versionCode=1
 author=Tablet
 description=a module that modifies the audio policy so that sound doesn't disappear with r-submix
