@@ -17,7 +17,7 @@ ports() {
 	# 1 = 1 | 2 
 	#   - index
 	# 2 = file
-
+  # 3 = final file
 
 	( xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/mixPorts" -t elem -n mixPort -v "" $2 \
 -i "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]" -t attr -n name -v \
@@ -33,7 +33,7 @@ ports() {
 -i "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]/profile" -t attr -n channelMasks -v \
 "$(xmlstarlet sel -t -v "/module/mixPorts/mixPort[$1]/profile/@channelMasks" $mytmpdir/s_mp.xml)" \
 ) | \
-	( xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/devicePorts" -t elem -n devicePort -v "" \
+( xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/devicePorts" -t elem -n devicePort -v "" \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]" -t attr -n tagName -v \
 "$(xmlstarlet sel -t -v "/module/devicePorts/devicePort[$1]/@tagName" $mytmpdir/s_dp.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]" -t attr -n role -v \
@@ -46,29 +46,46 @@ ports() {
 "$(xmlstarlet sel -t -v "/module/devicePorts/devicePort[$1]/profile/@samplingRates" $mytmpdir/s_dp.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]/profile" -t attr -n channelMasks -v \
 "$(xmlstarlet sel -t -v "/module/devicePorts/devicePort[$1]/profile/@channelMasks" $mytmpdir/s_dp.xml)" \
-) > $2
+) > $3
 }
 
 routes() {
 	xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\")]" $1 | while read line; do
-		xmlstarlet ed --in-place -u "$line/@sources" -v "$(xmlstarlet sel -t -v "$line/@sources"),Remote Submix Out" $1
+		xmlstarlet ed -u "$line/@sources" -v "$(xmlstarlet sel -t -v "$line/@sources"),Remote Submix Out" $1 > $2
 	done
 }
 
 add_input() {
 	leline="/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources"
-	xmlstarlet ed --in-place -u "$leline" -v "$(xmlstarlet sel -t -v "$leline"),Built-In Mic,BT SCO Headset Mic,USB Device In,USB Headset In" $1
+	cat $1 | xmlstarlet ed -u "$leline" -v "$(xmlstarlet sel -t -v "$leline"),Built-In Mic,BT SCO Headset Mic,USB Device In,USB Headset In" > $2
 }
 
 base() {
+	cp $MODPATH/system/vendor/etc/audio_policy_configuration.xml $MODPATH/system/vendor/etc/audio_policy_configuration-2.xml 
 	the_file=$MODPATH/system/vendor/etc/audio_policy_configuration.xml
-	xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/attachedDevices" --type elem -n item -v "Remote Submix In" $1 > $the_file
-	ports 1 $the_file
-	ports 2 $the_file
+	copy=$MODPATH/system/vendor/etc/audio_policy_configuration-2.xml
 	
-	routes $the_file
+	
+	
+	xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/attachedDevices" --type elem -n item -v "Remote Submix In" $1 > $copy
+	
+	mv $copy $the_file
 
-	xmlstarlet ed --in-place -u "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources" -v "$(xmlstarlet sel -t -v "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources"),primary output" $the_file
+	ports 1 $the_file $copy
+
+	mv $copy $the_file
+
+	ports 2 $the_file $copy
+
+	mv $copy $the_file
+
+	routes $the_file $copy
+
+	mv $copy $the_file
+
+	cat $the_file | xmlstarlet ed -u "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources" -v "$(xmlstarlet sel -t -v "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources"),primary output" > $copy
+
+	mv $copy $the_file
 
 	ui_print "************************"
 	ui_print "  ✓ base patches done.  "
@@ -80,8 +97,9 @@ base() {
 	ui_print "    ( VOL ▽ = 'no'  )"
 
 	if chooseport 5; then
-		ui_print "running micrphone patch..."
-		add_input $the_file
+		ui_print "running microphone patch..."
+		add_input $the_file $copy
+		mv $copy $the_file
 	else
 		ui_print "skipping mic patch."
 	fi
