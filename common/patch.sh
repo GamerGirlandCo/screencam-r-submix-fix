@@ -19,73 +19,88 @@ ports() {
 	# 2 = file
   # 3 = final file
 
-	( xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/mixPorts" -t elem -n mixPort -v "" $2 \
+	( xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/mixPorts" -t elem -n mixPort -v "" \
 -i "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]" -t attr -n name -v \
-"$(xmlstarlet sel -t -v "/module/mixPorts/mixPort[$1]/@name" $mytmpdir/s_mp.xml)" \
+"$(xmlstarlet sel -t -v "/mixPorts/mixPort[$1]/@name" $mytmpdir/s_mp.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]" -t attr -n role -v \
-"$(xmlstarlet sel -t -v "/module/mixPorts/mixPort[$1]/@role" $mytmpdir/s_mp.xml)" \
+"$(xmlstarlet sel -t -v "/mixPorts/mixPort[$1]/@role" $mytmpdir/s_mp.xml)" \
 -s "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]" -t elem -n profile \
 -i "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]/profile" -t attr -n name -v "" \
 -i "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]/profile" -t attr -n format -v \
-"$(xmlstarlet sel -t -v "/module/mixPorts/mixPort[$1]/profile/@format" $mytmpdir/s_mp.xml)" \
+"$(xmlstarlet sel -t -v "/mixPorts/mixPort[$1]/profile/@format" $mytmpdir/s_mp.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]/profile" -t attr -n samplingRates -v \
-"$(xmlstarlet sel -t -v "/module/mixPorts/mixPort[$1]/profile/@samplingRates" $mytmpdir/s_mp.xml)" \
+"$(xmlstarlet sel -t -v "/mixPorts/mixPort[$1]/profile/@samplingRates" $mytmpdir/s_mp.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort[count(/audioPolicyConfiguration/modules/module[1]/mixPorts/mixPort)]/profile" -t attr -n channelMasks -v \
-"$(xmlstarlet sel -t -v "/module/mixPorts/mixPort[$1]/profile/@channelMasks" $mytmpdir/s_mp.xml)" \
+"$(xmlstarlet sel -t -v "/mixPorts/mixPort[$1]/profile/@channelMasks" $mytmpdir/s_mp.xml)" $2 \
 ) | \
 ( xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/devicePorts" -t elem -n devicePort -v "" \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]" -t attr -n tagName -v \
-"$(xmlstarlet sel -t -v "/module/devicePorts/devicePort[$1]/@tagName" $mytmpdir/s_dp.xml)" \
+"$(xmlstarlet sel -t -v "/devicePorts/devicePort[$1]/@tagName" $mytmpdir/s_dp.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]" -t attr -n role -v \
-"$(xmlstarlet sel -t -v "/module/devicePorts/devicePort[$1]/@role" $mytmpdir/s_dp.xml)" \
+"$(xmlstarlet sel -t -v "/devicePorts/devicePort[$1]/@role" $mytmpdir/s_dp.xml)" \
 -s "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]" -t elem -n profile \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]/profile" -t attr -n name -v "" \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]/profile" -t attr -n format -v \
-"$(xmlstarlet sel -t -v "/module/devicePorts/devicePort[$1]/profile/@format" $mytmpdir/s_dp.xml)" \
+"$(xmlstarlet sel -t -v "/devicePorts/devicePort[$1]/profile/@format" $mytmpdir/s_dp.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]/profile" -t attr -n samplingRates -v \
-"$(xmlstarlet sel -t -v "/module/devicePorts/devicePort[$1]/profile/@samplingRates" $mytmpdir/s_dp.xml)" \
+"$(xmlstarlet sel -t -v "/devicePorts/devicePort[$1]/profile/@samplingRates" $mytmpdir/s_dp.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort[count(/audioPolicyConfiguration/modules/module[1]/devicePorts/devicePort)]/profile" -t attr -n channelMasks -v \
-"$(xmlstarlet sel -t -v "/module/devicePorts/devicePort[$1]/profile/@channelMasks" $mytmpdir/s_dp.xml)" \
+"$(xmlstarlet sel -t -v "/devicePorts/devicePort[$1]/profile/@channelMasks" $mytmpdir/s_dp.xml)" \
 ) > $3
 }
 
 routes() {
-	xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\")]" $1 | while read line; do
-		xmlstarlet ed -u "$line/@sources" -v "$(xmlstarlet sel -t -v "$line/@sources"),Remote Submix Out" $1 > $2
+	bet=$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\")]" $1)
+	actual=$1.tmp
+	cp $1 $actual
+	IFS=$'\n'
+	for line in $bet; do
+	  echo $line
+		xmlstarlet ed -u "$line/@sources" -v "$(xmlstarlet sel -t -v "$line/@sources" $actual),Remote Submix Out" $1 > $2
+		mv $2 $1
 	done
+	rm $actual
+	IFS=' '
 }
 
 add_input() {
 	leline="/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources"
-	cat $1 | xmlstarlet ed -u "$leline" -v "$(xmlstarlet sel -t -v "$leline"),Built-In Mic,BT SCO Headset Mic,USB Device In,USB Headset In" > $2
+	cat $1 | xmlstarlet ed -u "$leline" -v "$(xmlstarlet sel -t -v "$leline" $1),Built-In Mic,BT SCO Headset Mic,USB Device In,USB Headset In" > $2
 }
 
 base() {
-	cp $MODPATH/system/vendor/etc/audio_policy_configuration.xml $MODPATH/system/vendor/etc/audio_policy_configuration-2.xml 
 	the_file=$MODPATH/system/vendor/etc/audio_policy_configuration.xml
 	copy=$MODPATH/system/vendor/etc/audio_policy_configuration-2.xml
+	cp -T $the_file $copy
 	
+	xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/attachedDevices" --type elem -n item -v "Remote Submix In" $the_file > $copy
 	
-	
-	xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/attachedDevices" --type elem -n item -v "Remote Submix In" $1 > $copy
-	
-	mv $copy $the_file
+	echo "0." $(cat $copy | tail -n 1)
+
+	mv -T $copy $the_file
+	echo "1." $(cat $the_file | tail -n 1)
 
 	ports 1 $the_file $copy
 
-	mv $copy $the_file
+	mv -T $copy $the_file
+	echo "2." $(cat $the_file | tail -n 1)
 
 	ports 2 $the_file $copy
 
-	mv $copy $the_file
+	mv -T $copy $the_file
+	echo "3." $(cat $the_file | tail -n 1)
 
 	routes $the_file $copy
 
-	mv $copy $the_file
+	mv -T $copy $the_file
+	echo "4." $(cat $the_file | tail -n 1)
 
-	cat $the_file | xmlstarlet ed -u "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources" -v "$(xmlstarlet sel -t -v "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources"),primary output" > $copy
+	xmlstarlet ed -u "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources" -v "$(xmlstarlet sel -t -v "/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources" $the_file),primary output" $the_file > $copy
 
-	mv $copy $the_file
+	echo "4.2." $(cat $copy | tail -n 1)
+
+	mv -T $copy $the_file
+	echo "5." $(cat $the_file | tail -n 1)
 
 	ui_print "************************"
 	ui_print "  ✓ base patches done.  "
@@ -99,8 +114,10 @@ base() {
 	if chooseport 5; then
 		ui_print "running microphone patch..."
 		add_input $the_file $copy
-		mv $copy $the_file
+		mv -T $copy $the_file
 	else
 		ui_print "skipping mic patch."
 	fi
+	echo "finfin"
+	cat $the_file | tail -n 5
 }
