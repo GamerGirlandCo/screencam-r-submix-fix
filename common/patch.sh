@@ -50,7 +50,7 @@ ports() {
 }
 
 routes() {
-	bet=$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\")]" $1)
+	bet=$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\") | @sink=\"Telephony Tx\"]" $1)
 	actual=$1.tmp
 	cp $1 $actual
 	IFS=$'\n'
@@ -60,6 +60,7 @@ routes() {
 	done
 	rm $actual
 	IFS=' '
+
 }
 
 add_input() {
