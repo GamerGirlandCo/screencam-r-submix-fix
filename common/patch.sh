@@ -65,7 +65,7 @@ inner_routes() {
 }
 
 outer_routes() {
-	bet="$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[(contains(@sources, \"primary output\") | @sink=\"Telephony Tx\")]" $1)"
+	bet="$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[(contains(@sources, \"primary output\") or @sink=\"Telephony Tx\")]" $1)"
 	actual=$1.tmp
 	cp $1 $actual
 	IFS=$(printf '\n')
@@ -79,7 +79,8 @@ outer_routes() {
 
 add_input() {
 	leline="/audioPolicyConfiguration/modules/module/routes/route[@sink=\"Remote Submix Out\"]/@sources"
-	cat $1 | xmlstarlet ed -u "$leline" -v "$(xmlstarlet sel -t -v "$leline" $1),Built-In Mic,BT SCO Headset Mic,USB Device In,USB Headset In" > $2
+	cat $1 | xmlstarlet ed -u "$leline" -v "$(xmlstarlet sel -t -v "$leline" $1)" > $2
+	# Built-In Mic,BT SCO Headset Mic,USB Device In,USB Headset In
 }
 
 base() {
