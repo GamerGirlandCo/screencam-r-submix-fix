@@ -69,12 +69,12 @@ outer_routes() {
 	cp $1 $actual
 	xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\") or (@sink = \"Telephony Tx\")]" $1 | while read -r line; do 
 			nee=$(xmlstarlet sel -t -v "$line/@sources" $actual)
-			echo "L" $line
-			echo "no" $nee
+			#echo "L" $line
+			#echo "no" $nee
 			xmlstarlet ed -u "$line/@sources" -v "$nee,Remote Submix Out" $1 > $2
 			mv -T $2 $1
 		done
-		rm $actual
+	rm $actual
 }
 
 add_input() {
@@ -117,6 +117,8 @@ base() {
 
 
 	mv -T $copy $the_file
+	
+	xmlstarlet ed -d "//[@href=\"r_submix_audio_policy_configuration.xml\"]"
 
 	ui_print "************************"
 	ui_print "  ✓ base patches done.  "
