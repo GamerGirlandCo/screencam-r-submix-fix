@@ -61,7 +61,7 @@ inner_routes() {
 "$(xmlstarlet sel -t -v "/routes/route[$1]/@sink" $mytmpdir/s_rt.xml)" \
 -i "/audioPolicyConfiguration/modules/module[1]/routes/route[count(/audioPolicyConfiguration/modules/module[1]/routes/route)]" -t attr -n sources -v \
 "$(xmlstarlet sel -t -v "/routes/route[$1]/@sources" $mytmpdir/s_rt.xml)" $2 > $3
-	cat $3 | tail -n 30
+ #	cat $3 | tail -n 30
 }
 
 outer_routes() {
@@ -135,5 +135,4 @@ base() {
 	else
 		ui_print "skipping mic patch."
 	fi
-	cat $the_file | tail -n 5
 }
