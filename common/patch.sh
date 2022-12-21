@@ -140,4 +140,4 @@ base() {
 	fi
 }
 
-rm -r $mytmpdirs
+rm -r $mytmpdir
