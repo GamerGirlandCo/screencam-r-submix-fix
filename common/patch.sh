@@ -73,8 +73,8 @@ outer_routes() {
 		xmlstarlet ed -u "$line/@sources" -v "$(xmlstarlet sel -t -v "$line/@sources" $actual),Remote Submix Out" $1 > $2
 		mv $2 $1
 	done
-	rm $actual
 	IFS=' '
+	rm $actual
 }
 
 add_input() {
