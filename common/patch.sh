@@ -9,6 +9,7 @@ mkdir $mytmpdir
 getbasesubmix() {
 	xmlstarlet sel -t -c "/module/mixPorts" -n $1 > $mytmpdir/s_mp.xml
 	xmlstarlet sel -t -c "/module/devicePorts" -n $1 > $mytmpdir/s_dp.xml
+	xmlstarlet sel -t -c "/module/routes" -n $1 > $mytmpdir/s_rt.xml
 }
 
 # d r y #
@@ -49,7 +50,20 @@ ports() {
 ) > $3
 }
 
-routes() {
+inner_routes() {
+	# 1 = 1 | 2 
+	#   - index
+	# 2 = file
+  # 3 = final file
+	xmlstarlet ed -s "/audioPolicyConfiguration/modules/module[1]/routes" -t elem -n route -v "" \
+-i "/audioPolicyConfiguration/modules/module[1]/routes/route[count(/audioPolicyConfiguration/modules/module[1]/routes/route)]" -t attr -n "type" -v "mix" \
+-i "/audioPolicyConfiguration/modules/module[1]/routes/route[count(/audioPolicyConfiguration/modules/module[1]/routes/route)]" -t attr -n sink -v \
+"$(xmlstarlet sel -t -v "/routes/route[$1]/@sink" $mytmpdir/s_rt.xml)" \
+-i "/audioPolicyConfiguration/modules/module[1]/routes/route[count(/audioPolicyConfiguration/modules/module[1]/routes/route)]" -t attr -n sources -v \
+"$(xmlstarlet sel -t -v "/routes/route[$1]/@sources" $mytmpdir/s_rt.xml)" $2 > $3
+}
+
+outer_routes() {
 	bet=$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\") | @sink=\"Telephony Tx\"]" $1)
 	actual=$1.tmp
 	cp $1 $actual
@@ -60,7 +74,6 @@ routes() {
 	done
 	rm $actual
 	IFS=' '
-
 }
 
 add_input() {
@@ -86,7 +99,15 @@ base() {
 
 	mv -T $copy $the_file
 
-	routes $the_file $copy
+	outer_routes $the_file $copy
+
+	mv -T $copy $the_file
+
+	inner_routes 1 $the_file $copy 
+
+	mv -T $copy $the_file
+	
+	inner_routes 2 $the_file $copy 
 
 	mv -T $copy $the_file
 
