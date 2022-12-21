@@ -65,11 +65,12 @@ inner_routes() {
 }
 
 outer_routes() {
+	IFS=$(printf '\n')
 	bet=$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\") or (@sink = \"Telephony Tx\")]" $1)
 	echo "$bet"
 	actual=$1.tmp
 	cp $1 $actual
-	IFS=$(printf '\n')
+	
 	for line in $bet; do
 		nee=$(xmlstarlet sel -t -v "$line/@sources" $actual)
 		echo "L" $line
