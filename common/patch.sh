@@ -65,11 +65,11 @@ inner_routes() {
 }
 
 outer_routes() {
-	bet=$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[contains(@sources, \"primary output\") | @sink=\"Telephony Tx\"]" $1)
+	bet="$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[(contains(@sources, \"primary output\") | @sink=\"Telephony Tx\")]" $1)"
 	actual=$1.tmp
 	cp $1 $actual
 	IFS=$(printf '\n')
-	for line in $bet; do
+	for line in "$bet"; do
 		xmlstarlet ed -u "$line/@sources" -v "$(xmlstarlet sel -t -v "$line/@sources" $actual),Remote Submix Out" $1 > $2
 		mv $2 $1
 	done
