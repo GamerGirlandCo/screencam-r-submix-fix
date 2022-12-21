@@ -118,7 +118,9 @@ base() {
 
 	mv -T $copy $the_file
 	
-	xmlstarlet ed -d "//[@href=\"r_submix_audio_policy_configuration.xml\"]"
+	xmlstarlet ed -d "//*[@href=\"r_submix_audio_policy_configuration.xml\"]" $the_file > $copy
+	
+	mv -T $copy $the_file
 
 	ui_print "************************"
 	ui_print "  ✓ base patches done.  "
