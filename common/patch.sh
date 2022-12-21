@@ -72,7 +72,7 @@ outer_routes() {
 	IFS=$(printf '\n')
 	for line in "$bet"; do
 		xmlstarlet ed -u "$line/@sources" -v "$(xmlstarlet sel -t -v "$line/@sources" $actual),Remote Submix Out" $1 > $2
-		mv $2 $1
+		mv -T $2 $1
 	done
 	IFS=' '
 	rm $actual
