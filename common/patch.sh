@@ -65,7 +65,7 @@ inner_routes() {
 }
 
 outer_routes() {
-	bet="$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[(contains(@sources, \"primary output\") or @sink = \"Telephony Tx\")]" $1)"
+	bet="$(xmatch "/audioPolicyConfiguration/modules/module/routes/route[(contains(@sources, \"primary output\")) or (@sink = \"Telephony Tx\")]" $1)"
 	actual=$1.tmp
 	cp $1 $actual
 	IFS=$(printf '\n')
