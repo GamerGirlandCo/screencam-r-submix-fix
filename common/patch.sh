@@ -72,6 +72,7 @@ outer_routes() {
 	#IFS=$(printf '\n')
 	for line in "$bet"; do
 		nee=$(xmlstarlet sel -t -v "$line/@sources" $actual)
+		echo "L" $line
 		echo "no" $nee
 		xmlstarlet ed -u "$line/@sources" -v "$nee,Remote Submix Out" $1 > $2
 		mv -T $2 $1
