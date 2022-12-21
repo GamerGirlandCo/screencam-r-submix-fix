@@ -139,3 +139,5 @@ base() {
 		ui_print "skipping mic patch."
 	fi
 }
+
+rm -r $mytmpdirs
