@@ -69,8 +69,8 @@ outer_routes() {
 	echo "$bet"
 	actual=$1.tmp
 	cp $1 $actual
-	#IFS=$(printf '\n')
-	for line in "$bet"; do
+	IFS=$(printf '\n')
+	for line in $bet; do
 		nee=$(xmlstarlet sel -t -v "$line/@sources" $actual)
 		echo "L" $line
 		echo "no" $nee
